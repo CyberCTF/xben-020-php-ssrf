@@ -1,0 +1,215 @@
+{
+  "generated_by_isoloom": "from isoloom.yml; don't edit: change the spec and run `isoloom generate` (`isoloom check` fails when this file is out of date)",
+  "resolved_version": 1,
+  "name": "xben-020-php-ssrf",
+  "instance": null,
+  "inputs": [],
+  "networks": {
+    "lab": {
+      "cidr": "10.61.63.0/24",
+      "docker_cidr": "10.61.63.0/24",
+      "internet": false,
+      "gateway": null,
+      "gateway_address": "10.61.63.1",
+      "router": null,
+      "controller": "10.61.63.253"
+    }
+  },
+  "reach": [],
+  "machines": {
+    "web": {
+      "access": false,
+      "supplied": false,
+      "shapes": [
+        "docker"
+      ],
+      "arch": "amd64",
+      "os": null,
+      "windows": false,
+      "addresses": {
+        "lab": "10.61.63.10"
+      },
+      "docker_addresses": {
+        "lab": "10.61.63.10"
+      },
+      "services": [
+        {
+          "port": 80,
+          "name": "web",
+          "http": true,
+          "publish": 80
+        }
+      ],
+      "depends_on": [
+        "internal-service"
+      ],
+      "inputs": [],
+      "volumes": {},
+      "resources": {
+        "cpus": 1,
+        "memory_mb": 512,
+        "disk_gb": 20
+      },
+      "gateway_of": [],
+      "routes": [],
+      "default_gateway": null,
+      "offline": true
+    },
+    "internal-service": {
+      "access": false,
+      "supplied": false,
+      "shapes": [
+        "docker"
+      ],
+      "arch": "amd64",
+      "os": null,
+      "windows": false,
+      "addresses": {
+        "lab": "10.61.63.11"
+      },
+      "docker_addresses": {
+        "lab": "10.61.63.11"
+      },
+      "services": [
+        {
+          "port": 80,
+          "name": "web",
+          "http": true,
+          "publish": null
+        }
+      ],
+      "depends_on": [],
+      "inputs": [],
+      "volumes": {},
+      "resources": {
+        "cpus": 1,
+        "memory_mb": 512,
+        "disk_gb": 20
+      },
+      "gateway_of": [],
+      "routes": [],
+      "default_gateway": null,
+      "offline": true
+    }
+  },
+  "start_order": [
+    "internal-service",
+    "web"
+  ],
+  "clones": {},
+  "tools": {},
+  "groups": {},
+  "router": null,
+  "controller": {
+    "addresses": {
+      "lab": "10.61.63.253"
+    }
+  },
+  "published": [
+    {
+      "machine": "web",
+      "port": 80,
+      "host_port": 80
+    }
+  ],
+  "targets": {
+    "possible": [
+      "docker",
+      "hosted",
+      "docker-vm",
+      "cloud-docker",
+      "kubernetes"
+    ],
+    "generated": [
+      "docker",
+      "hosted",
+      "docker-vm",
+      "cloud-docker",
+      "kubernetes"
+    ],
+    "refused": {},
+    "not_possible": {
+      "hybrid": "only when some machines are containers and others are VMs",
+      "vagrant": "needs `vm:` on web, internal-service",
+      "proxmox": "needs `vm:` on web, internal-service",
+      "cloud-vm": "needs `vm:` on web, internal-service",
+      "external": "needs `external:` on web, internal-service",
+      "cloud-services": "left out by `targets:`"
+    }
+  },
+  "checks": {
+    "default_position": "networks",
+    "positions": [
+      {
+        "position": "networks",
+        "machine": null,
+        "runner": "isoloom-check",
+        "checks": [
+          {
+            "name": "the web service answers",
+            "derived": false,
+            "kind": "http",
+            "target": "http://web/",
+            "expect": "any",
+            "wait": 180
+          },
+          {
+            "name": "the benchmark's page / is served",
+            "derived": false,
+            "kind": "script",
+            "target": "checks/probe.sh",
+            "expect": "",
+            "wait": 60
+          }
+        ]
+      },
+      {
+        "position": "web",
+        "machine": "web",
+        "runner": "isoloom-check-web",
+        "checks": [
+          {
+            "name": "internal-service:80 from web",
+            "derived": true,
+            "kind": "http",
+            "target": "http://10.61.63.11:80/",
+            "expect": "any",
+            "wait": 30
+          },
+          {
+            "name": "no internet from web",
+            "derived": true,
+            "kind": "http",
+            "target": "http://1.1.1.1/",
+            "expect": "blocked",
+            "wait": 0
+          }
+        ]
+      },
+      {
+        "position": "internal-service",
+        "machine": "internal-service",
+        "runner": "isoloom-check-internal-service",
+        "checks": [
+          {
+            "name": "web:80 from internal-service",
+            "derived": true,
+            "kind": "http",
+            "target": "http://10.61.63.10:80/",
+            "expect": "any",
+            "wait": 30
+          },
+          {
+            "name": "no internet from internal-service",
+            "derived": true,
+            "kind": "http",
+            "target": "http://1.1.1.1/",
+            "expect": "blocked",
+            "wait": 0
+          }
+        ]
+      }
+    ]
+  },
+  "message": "XBEN-020-24 (PHP SSRF) answers at http://localhost:80/.\nCan you reach the internal service? Start from the index of the exposed web server.\n"
+}
