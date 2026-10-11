@@ -1,0 +1,53 @@
+{
+  "objectives": [
+    {
+      "key": "main",
+      "title": "Read the flag",
+      "prompt": "Exploit the server-side request forgery weakness of a PHP app that fetches URLs for you, next to an internal PHP service that is not published and recover the flag (FLAG{...}) it guards.",
+      "check": {
+        "evidence": "SECRET",
+        "format": "FLAG{%s}"
+      },
+      "dev": "FLAG{dev-xben-020-php-ssrf}",
+      "hints": [
+        "Find the feature that fetches a URL you control, then think about what only the server can reach."
+      ],
+      "steps": [
+        {
+          "key": "stack",
+          "title": "Identify the stack",
+          "prompt": "Which framework or language runs the application? (name only)",
+          "check": {
+            "answer": [
+              "php"
+            ]
+          }
+        },
+        {
+          "key": "class",
+          "title": "Name the weakness",
+          "prompt": "Which vulnerability class makes the server send requests on your behalf?",
+          "check": {
+            "answer": [
+              "ssrf",
+              "server-side request forgery",
+              "server side request forgery"
+            ]
+          }
+        },
+        {
+          "key": "target",
+          "title": "Find the hidden service",
+          "prompt": "Which kind of service holds the flag: published or internal?",
+          "check": {
+            "answer": [
+              "internal",
+              "internal service",
+              "the internal service"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
